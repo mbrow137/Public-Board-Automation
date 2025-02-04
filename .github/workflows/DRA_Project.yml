@@ -1,0 +1,78 @@
+name: Fetch DRA Issues and PRs & Add to Project
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+  workflow_dispatch: # Allows manual execution
+
+jobs:
+  fetch-and-add-to-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch DRA Issues and PRs and Add to Project
+        id: fetch-dra-items
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const projectId = "PVT_kwHOCAOYJ84AxfwF"; // Project Board ID
+
+            async function fetchDRAItems(github) {
+              const query = `
+                repo:kubernetes/autoscaler
+                (DRA OR "Dynamic Resource Allocation")
+              `.replace(/\s+/g, ' ').trim();
+
+              const items = [];
+              let page = 1;
+              let hasMore = true;
+
+              while (hasMore) {
+                const results = await github.rest.search.issuesAndPullRequests({
+                  q: query,
+                  per_page: 100,
+                  page,
+                });
+
+                items.push(...results.data.items);
+                hasMore = results.data.items.length === 100;
+                page += 1;
+              }
+
+              return items;
+            }
+
+            async function addToProject(github, contentId) {
+              try {
+                await github.graphql(`
+                  mutation($projectId: ID!, $contentId: ID!) {
+                    addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                      item {
+                        id
+                      }
+                    }
+                  }
+                `, {
+                  projectId: projectId,
+                  contentId: contentId
+                });
+                console.log(`Successfully added item ${contentId} to project.`);
+              } catch (error) {
+                console.error(`Failed to add item ${contentId} to project: ${error.message}`);
+              }
+            }
+
+            console.log("Fetching all DRA-related issues and PRs...");
+            const draItems = await fetchDRAItems(github);
+
+            if (draItems.length === 0) {
+              console.log("No issues or PRs found related to DRA.");
+              return;
+            }
+
+            console.log(`Found ${draItems.length} DRA-related items. Adding to project...`);
+
+            for (const item of draItems) {
+              await addToProject(github, item.node_id);
+            }
