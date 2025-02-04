@@ -8,8 +8,6 @@ on:
 jobs:
   fetch-and-add-to-project:
     runs-on: ubuntu-latest
-    env:
-    GH_PAT: ${{ secrets.GH_PAT }}
 
     steps:
       - name: Fetch DRA Issues and PRs and Add to Project
