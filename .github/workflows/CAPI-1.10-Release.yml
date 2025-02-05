@@ -18,7 +18,6 @@ jobs:
           script: |
             const projectId = "PVT_kwHOCAOYJ84AxkbT"; // Project Board ID
             const repo = "kubernetes-sigs/cluster-api";
-            const sinceDate = "2025-01-27T00:00:00Z";
             
             async function fetchItems(github, query) {
               const items = [];
@@ -62,7 +61,7 @@ jobs:
 
             console.log("Fetching all Cluster API-related issues and PRs...");
             
-            const milestoneQuery = `repo:${repo} milestone:v1.10 updated:>=${sinceDate}`;
+            const milestoneQuery = `repo:${repo} milestone:v1.10`;
             
             const milestoneItems = await fetchItems(github, milestoneQuery);
             
