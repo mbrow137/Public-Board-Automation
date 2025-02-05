@@ -17,7 +17,7 @@ jobs:
           github-token: ${{ secrets.GH_PAT }}
           script: |
             const projectId = "PVT_kwHOCAOYJ84AxkbT"; // Project Board ID
-            const repo = "kubernetes/cluster-api";
+            const repo = "kubernetes-sigs/cluster-api";
             const sinceDate = "2025-01-27T00:00:00Z";
             
             async function fetchItems(github, query) {
