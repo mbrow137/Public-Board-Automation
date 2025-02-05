@@ -75,7 +75,8 @@ jobs:
               return;
             }
 
-            console.log(`Found ${allItems.length} relevant items. Adding to project...");
+            console.log(`Found ${allItems.length} relevant items. Adding to project...`);
+
 
             for (const item of allItems) {
               await addToProject(github, item.node_id);
