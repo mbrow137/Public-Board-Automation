@@ -18,7 +18,7 @@ jobs:
           script: |
             const projectId = "PVT_kwHOCAOYJ84AxkbT"; // Project Board ID
             const repo = "kubernetes/cluster-api";
-            const sinceDate = "2025-01-27";
+            const sinceDate = "2025-01-27T00:00:00Z";
             
             async function fetchItems(github, query) {
               const items = [];
@@ -63,21 +63,16 @@ jobs:
             console.log("Fetching all Cluster API-related issues and PRs...");
             
             const milestoneQuery = `repo:${repo} milestone:v1.10 updated:>=${sinceDate}`;
-            const baseQuery = `repo:${repo} base:release-1.9 updated:>=${sinceDate}`;
             
             const milestoneItems = await fetchItems(github, milestoneQuery);
-            const baseItems = await fetchItems(github, baseQuery);
             
-            const allItems = [...milestoneItems, ...baseItems];
-            
-            if (allItems.length === 0) {
-              console.log("No issues or PRs found for milestone v1.10 or base: release-1.9.");
+            if (milestoneItems.length === 0) {
+              console.log("No issues or PRs found for milestone v1.10.");
               return;
             }
 
-            console.log(`Found ${allItems.length} relevant items. Adding to project...`);
+            console.log(`Found ${milestoneItems.length} relevant items. Adding to project...`);
 
-
-            for (const item of allItems) {
+            for (const item of milestoneItems) {
               await addToProject(github, item.node_id);
             }
