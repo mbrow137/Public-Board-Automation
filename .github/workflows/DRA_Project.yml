@@ -21,6 +21,7 @@ jobs:
             async function fetchDRAItems(github) {
               const query = `
                 repo:kubernetes/autoscaler
+                repo:kubernetes/enhancements
                 (DRA OR "Dynamic Resource Allocation")
               `.replace(/\s+/g, ' ').trim();
 
