@@ -22,6 +22,7 @@ jobs:
               const query = `
                 repo:kubernetes/autoscaler
                 repo:kubernetes/enhancements
+                repo:kubernetes/kubernetes
                 (DRA OR "Dynamic Resource Allocation")
               `.replace(/\s+/g, ' ').trim();
 
