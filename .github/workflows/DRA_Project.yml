@@ -17,28 +17,35 @@ jobs:
           github-token: ${{ secrets.GH_PAT }}
           script: |
             const projectId = "PVT_kwHOCAOYJ84AxfwF"; // Project Board ID
+            const keywordRegex = /\bDRA\b|\bDynamic Resource Allocation\b/i;
 
             async function fetchDRAItems(github) {
-              const query = `
-                repo:kubernetes/autoscaler
-                repo:kubernetes/enhancements
-                (DRA OR "Dynamic Resource Allocation")
-              `.replace(/\s+/g, ' ').trim();
+              const queries = [
+                'repo:kubernetes/autoscaler (DRA OR "Dynamic Resource Allocation")',
+                'repo:kubernetes/enhancements (DRA OR "Dynamic Resource Allocation")',
+              ];
 
               const items = [];
-              let page = 1;
-              let hasMore = true;
 
-              while (hasMore) {
-                const results = await github.rest.search.issuesAndPullRequests({
-                  q: query,
-                  per_page: 100,
-                  page,
-                });
+              for (const query of queries) {
+                let page = 1;
+                let hasMore = true;
 
-                items.push(...results.data.items);
-                hasMore = results.data.items.length === 100;
-                page += 1;
+                while (hasMore) {
+                  const results = await github.rest.search.issuesAndPullRequests({
+                    q: query,
+                    per_page: 100,
+                    page,
+                  });
+
+                  const filteredResults = results.data.items.filter(item =>
+                    keywordRegex.test(item.title || '') || keywordRegex.test(item.body || '')
+                  );
+
+                  items.push(...filteredResults);
+                  hasMore = results.data.items.length === 100;
+                  page += 1;
+                }
               }
 
               return items;
@@ -58,22 +65,21 @@ jobs:
                   projectId: projectId,
                   contentId: contentId
                 });
-                console.log(`Successfully added item ${contentId} to project.`);
+                console.log(`✅ Added item ${contentId} to project.`);
               } catch (error) {
-                console.error(`Failed to add item ${contentId} to project: ${error.message}`);
+                console.error(`❌ Failed to add item ${contentId}: ${error.message}`);
               }
             }
 
-            console.log("Fetching all DRA-related issues and PRs...");
+            console.log("🔍 Fetching DRA-related issues and PRs...");
             const draItems = await fetchDRAItems(github);
 
             if (draItems.length === 0) {
-              console.log("No issues or PRs found related to DRA.");
+              console.log("ℹ️ No valid DRA-related items found.");
               return;
             }
 
-            console.log(`Found ${draItems.length} DRA-related items. Adding to project...`);
-
+            console.log(`📌 Found ${draItems.length} valid DRA items. Adding to project...`);
             for (const item of draItems) {
               await addToProject(github, item.node_id);
             }
