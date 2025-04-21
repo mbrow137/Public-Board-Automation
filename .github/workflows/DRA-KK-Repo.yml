@@ -2,7 +2,7 @@ name: Fetch WG Device Management Issues & Add to Project
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+    - cron: '0 11 * * *'  # Runs every morning ET
   workflow_dispatch: # Allows manual execution
 
 jobs:
